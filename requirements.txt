@@ -2,3 +2,4 @@ feedparser
 requests
 pytz
 anthropic
+beautifulsoup4
