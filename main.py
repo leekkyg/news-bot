@@ -6,7 +6,7 @@ import os
 import google.generativeai as genai
 
 # 환경변수
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 WP_URL = os.environ.get("WP_URL")
 WP_USER = os.environ.get("WP_USER")
 WP_APP_PASSWORD = os.environ.get("WP_APP_PASSWORD")
@@ -36,7 +36,7 @@ def fetch_news():
     return all_news
 
 def summarize_with_gemini(news_list):
-    genai.configure(api_key=GEMINI_API_KEY)
+    genai.configure(api_key=GOOGLE_API_KEY)
     model = genai.GenerativeModel('gemini-1.5-flash')
     
     news_text = ""
