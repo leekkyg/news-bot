@@ -113,7 +113,7 @@ HTML 형식으로 출력하세요. (p 태그로 문단 구분)"""
     return message.content[0].text
 
 def post_to_wordpress(title, content, stock_info):
-    image_url = "https://pub-d5e485446b5c4e8d900036e639bf8d6c.r2.dev/wp-content/uploads/2025/12/%ED%95%9C%EC%A4%84%EB%89%B4%EC%8A%A4.webp"
+    image_url = "https://pub-d5e485446b5c4e8d900036e639bf8d6c.r2.dev/wp-content/uploads/2025/12/newss.jpg"
     full_content = f'<img src="{image_url}" alt="간추린 뉴스" />\n\n{content}\n\n<p><strong>📈 오늘의 증시</strong><br>{stock_info}</p>'
     
     endpoint = f"{WP_URL}/wp-json/wp/v2/posts"
@@ -121,7 +121,7 @@ def post_to_wordpress(title, content, stock_info):
         "title": title,
         "content": full_content,
         "status": "publish",
-        "featured_media": 2796,
+        "featured_media": 2801,
     }
     response = requests.post(
         endpoint,
