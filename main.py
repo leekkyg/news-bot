@@ -122,6 +122,7 @@ def post_to_wordpress(title, content, stock_info):
         "content": full_content,
         "status": "publish",
         "featured_media": 2801,
+        "categories": [127],
     }
     response = requests.post(
         endpoint,
