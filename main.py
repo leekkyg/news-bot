@@ -12,15 +12,17 @@ WP_URL = os.environ.get("WP_URL")
 WP_USER = os.environ.get("WP_USER")
 WP_APP_PASSWORD = os.environ.get("WP_APP_PASSWORD")
 
-# RSS 피드 목록
+# RSS 피드 목록 (속보/이슈 중심)
 RSS_FEEDS = [
-    ("연합뉴스", "https://www.yonhapnewstv.co.kr/browse/feed/"),
-    ("YTN", "https://www.ytn.co.kr/rss/headline.xml"),
-    ("KBS", "https://world.kbs.co.kr/rss/rss_news.htm?lang=k"),
-    ("MBC", "https://imnews.imbc.com/rss/news/news_00.xml"),
-    ("SBS", "https://news.sbs.co.kr/news/rss/rss_01.xml"),
+    ("연합뉴스 속보", "https://www.yna.co.kr/rss/news.xml"),
+    ("SBS 속보", "https://news.sbs.co.kr/news/rss/rss_00.xml"),
+    ("MBC 뉴스데스크", "https://imnews.imbc.com/rss/news/news_00.xml"),
+    ("KBS 속보", "https://world.kbs.co.kr/rss/rss_news.htm?lang=k"),
+    ("조선일보", "https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml"),
+    ("중앙일보", "https://rss.joins.com/joins_news_list.xml"),
     ("한겨레", "https://www.hani.co.kr/rss/"),
     ("경향신문", "https://www.khan.co.kr/rss/rssdata/total_news.xml"),
+    ("구글뉴스 한국속보", "https://news.google.com/rss/search?q=한국+속보&hl=ko&gl=KR&ceid=KR:ko"),
 ]
 
 def fetch_news():
@@ -96,6 +98,12 @@ def summarize_with_claude(news_list):
 - 감정적·선동적 표현 금지, 정보 전달 위주
 - 전체 톤은 shortnews.co.kr처럼 차분하고 명확하게
 - 날씨는 구체적인 기온과 지역별 날씨 정보 포함
+
+[중요: 뉴스 선별 기준]
+- 조회수 높고 이슈가 될 만한 뉴스 위주로 선별
+- 속보성 뉴스, 논란/갈등, 사건사고, 정치 이슈 우선 배치
+- 단순 행사/홍보성/기업 보도자료 뉴스는 제외
+- 사람들이 관심 가질 만한 핫한 뉴스 위주로 구성
 
 [입력 데이터]
 {news_text}
