@@ -3,10 +3,10 @@ import requests
 from datetime import datetime
 import pytz
 import os
-import google.generativeai as genai
+import anthropic
 
 # 환경변수
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 WP_URL = os.environ.get("WP_URL")
 WP_USER = os.environ.get("WP_USER")
 WP_APP_PASSWORD = os.environ.get("WP_APP_PASSWORD")
@@ -35,9 +35,8 @@ def fetch_news():
             print(f"[ERROR] {source_name} 피드 수집 실패: {e}")
     return all_news
 
-def summarize_with_gemini(news_list):
-    genai.configure(api_key=GOOGLE_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
+def summarize_with_claude(news_list):
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     
     news_text = ""
     for i, news in enumerate(news_list, 1):
@@ -60,14 +59,20 @@ def summarize_with_gemini(news_list):
 - 전체 톤은 차분하고 명확하게
 - HTML 형식으로 작성 (h3으로 분류명, p 태그 사용)
 
-
 [입력 데이터]
 {news_text}
 
 HTML 본문만 출력하세요."""
 
-    response = model.generate_content(prompt)
-    return response.text
+    message = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=2048,
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
+    )
+    
+    return message.content[0].text
 
 def post_to_wordpress(title, content):
     endpoint = f"{WP_URL}/wp-json/wp/v2/posts"
@@ -96,8 +101,8 @@ def main():
         print("[ERROR] 수집된 뉴스가 없습니다.")
         return
     
-    print("[2/3] Gemini로 요약 생성 중...")
-    article_content = summarize_with_gemini(news_list)
+    print("[2/3] Claude로 요약 생성 중...")
+    article_content = summarize_with_claude(news_list)
     
     print("[3/3] WordPress 발행 중...")
     kst = pytz.timezone('Asia/Seoul')
