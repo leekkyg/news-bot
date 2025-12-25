@@ -12,17 +12,21 @@ WP_URL = os.environ.get("WP_URL")
 WP_USER = os.environ.get("WP_USER")
 WP_APP_PASSWORD = os.environ.get("WP_APP_PASSWORD")
 
-# RSS 피드 목록 (속보/이슈 중심)
+# RSS 피드 목록 (속보/이슈/정치 중심)
 RSS_FEEDS = [
     ("연합뉴스 속보", "https://www.yna.co.kr/rss/news.xml"),
-    ("SBS 속보", "https://news.sbs.co.kr/news/rss/rss_00.xml"),
-    ("MBC 뉴스데스크", "https://imnews.imbc.com/rss/news/news_00.xml"),
-    ("KBS 속보", "https://world.kbs.co.kr/rss/rss_news.htm?lang=k"),
+    ("연합뉴스 정치", "https://www.yna.co.kr/rss/politics.xml"),
+    ("SBS 정치", "https://news.sbs.co.kr/news/rss/rss_01.xml"),
+    ("MBC 정치", "https://imnews.imbc.com/rss/news/news_01.xml"),
+    ("KBS 정치", "https://world.kbs.co.kr/rss/rss_news.htm?lang=k"),
     ("조선일보", "https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml"),
     ("중앙일보", "https://rss.joins.com/joins_news_list.xml"),
-    ("한겨레", "https://www.hani.co.kr/rss/"),
-    ("경향신문", "https://www.khan.co.kr/rss/rssdata/total_news.xml"),
-    ("구글뉴스 한국속보", "https://news.google.com/rss/search?q=한국+속보&hl=ko&gl=KR&ceid=KR:ko"),
+    ("한겨레 정치", "https://www.hani.co.kr/rss/politics/"),
+    ("경향신문 정치", "https://www.khan.co.kr/rss/rssdata/politic_news.xml"),
+    ("오마이뉴스", "http://rss.ohmynews.com/rss/ohmynews.xml"),
+    ("프레시안", "https://www.pressian.com/rss/section/all.xml"),
+    ("구글뉴스 국회", "https://news.google.com/rss/search?q=국회+여야+민주당+국민의힘&hl=ko&gl=KR&ceid=KR:ko"),
+    ("구글뉴스 정치이슈", "https://news.google.com/rss/search?q=이재명+한덕수+윤석열&hl=ko&gl=KR&ceid=KR:ko"),
 ]
 
 def fetch_news():
@@ -100,8 +104,10 @@ def summarize_with_claude(news_list):
 - 날씨는 구체적인 기온과 지역별 날씨 정보 포함
 
 [중요: 뉴스 선별 기준]
-- 조회수 높고 이슈가 될 만한 뉴스 위주로 선별
-- 속보성 뉴스, 논란/갈등, 사건사고, 정치 이슈 우선 배치
+- 여야 갈등, 국회 공방, 정치권 논란 뉴스 반드시 포함
+- 민주당/국민의힘 간 대립, 정쟁, 비판 관련 뉴스 우선 배치
+- 현 정부/정권 관련 비판 및 논란 기사 포함
+- 속보성 뉴스, 사건사고, 사회 이슈 포함
 - 단순 행사/홍보성/기업 보도자료 뉴스는 제외
 - 사람들이 관심 가질 만한 핫한 뉴스 위주로 구성
 
