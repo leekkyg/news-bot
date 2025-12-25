@@ -43,26 +43,27 @@ def summarize_with_claude(news_list):
         news_text += f"{i}. [{news['source']}] {news['title']}\n{news['summary']}\n\n"
     
     kst = pytz.timezone('Asia/Seoul')
-    today = datetime.now(kst).strftime("%Y년 %m월 %d일")
+    now = datetime.now(kst)
+    weekdays = ['월', '화', '수', '목', '금', '토', '일']
+    date_str = f"{now.strftime('%y')}년 {now.strftime('%m')}월 {now.strftime('%d')}일 {weekdays[now.weekday()]}요일"
     
-    prompt = f"""너는 실제 뉴스 편집국에서 일하는 편집 기자다.
-아래에 여러 개의 뉴스 기사가 주어진다.
-이를 바탕으로 아침에 보는 '간추린 뉴스' 형태로 재작성하라.
+    prompt = f"""너는 지역 언론사의 뉴스 편집 기자다.
+아래 뉴스들을 바탕으로 '간추린 숏뉴스'를 작성해라.
 
 [작성 규칙]
-- 정치 / 경제 / 사회 / 국제 / 기타로 분류해서 묶을 것
-- 각 뉴스는 "ㆍ" 기호로 시작
-- 일반 뉴스는 1문장 요약
-- 매우 중요한 뉴스는 2문장까지 허용
-- 기사 제목을 그대로 쓰지 말고 기자가 요약한 문장처럼 작성
-- 감정적·선동적 표현 금지, 정보 전달 위주
-- 전체 톤은 차분하고 명확하게
-- HTML 형식으로 작성 (h3으로 분류명, p 태그 사용)
+- 첫 줄: "{date_str} 간추린 숏뉴스입니다." 로 시작
+- 각 뉴스는 "■ (분류)" 로 시작 (정치/경제/사회/국제/날씨)
+- 일반 뉴스는 1~2문장, 중요한 뉴스는 3~4문장까지 허용
+- 기사 제목 그대로 쓰지 말고, 기자가 직접 정리한 것처럼 자연스럽게 작성
+- 딱딱한 보도체가 아닌, 사람이 읽기 편한 문체로 작성
+- 감정적·선동적 표현 금지
+- HTML 태그 없이 순수 텍스트로 작성
+- 줄바꿈으로 각 뉴스 구분
 
 [입력 데이터]
 {news_text}
 
-HTML 본문만 출력하세요."""
+텍스트만 출력하세요."""
 
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
@@ -75,10 +76,14 @@ HTML 본문만 출력하세요."""
     return message.content[0].text
 
 def post_to_wordpress(title, content):
+    # 이미지 태그 추가
+    image_url = "https://pub-d5e485446b5c4e8d900036e639bf8d6c.r2.dev/wp-content/uploads/2025/12/news.jpg"
+    full_content = f'<img src="{image_url}" alt="간추린 숏뉴스" />\n\n{content}'
+    
     endpoint = f"{WP_URL}/wp-json/wp/v2/posts"
     post_data = {
         "title": title,
-        "content": content,
+        "content": full_content,
         "status": "publish",
     }
     response = requests.post(
@@ -106,8 +111,10 @@ def main():
     
     print("[3/3] WordPress 발행 중...")
     kst = pytz.timezone('Asia/Seoul')
-    today = datetime.now(kst).strftime("%Y년 %m월 %d일")
-    post_to_wordpress(f"오늘의 주요뉴스 ({today})", article_content)
+    now = datetime.now(kst)
+    weekdays = ['월', '화', '수', '목', '금', '토', '일']
+    title = f"{now.strftime('%y')}년 {now.strftime('%m')}월 {now.strftime('%d')}일 {weekdays[now.weekday()]}요일 간추린 숏뉴스"
+    post_to_wordpress(title, article_content)
     print("=== 완료 ===")
 
 if __name__ == "__main__":
