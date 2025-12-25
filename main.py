@@ -17,6 +17,9 @@ RSS_FEEDS = [
     ("YTN", "https://www.ytn.co.kr/rss/headline.xml"),
     ("KBS", "https://world.kbs.co.kr/rss/rss_news.htm?lang=k"),
     ("MBC", "https://imnews.imbc.com/rss/news/news_00.xml"),
+    ("SBS", "https://news.sbs.co.kr/news/rss/rss_01.xml"),
+    ("한겨레", "https://www.hani.co.kr/rss/"),
+    ("경향신문", "https://www.khan.co.kr/rss/rssdata/total_news.xml"),
 ]
 
 def fetch_news():
@@ -24,7 +27,7 @@ def fetch_news():
     for source_name, feed_url in RSS_FEEDS:
         try:
             feed = feedparser.parse(feed_url)
-            for entry in feed.entries[:5]:
+            for entry in feed.entries[:10]:
                 all_news.append({
                     "source": source_name,
                     "title": entry.get("title", ""),
@@ -52,14 +55,16 @@ def summarize_with_claude(news_list):
 이를 바탕으로 아침에 보는 '간추린 뉴스' 형태로 재작성하라.
 
 [작성 규칙]
-- 첫 줄: "{date_str} 간추린 뉴스" 로 시작
-- 정치 / 경제 / 사회 / 국제 / 기타로 분류해서 묶을 것
-- 각 뉴스는 "ㆍ" 기호로 시작
-- 일반 뉴스는 1문장 요약
-- 매우 중요한 뉴스는 2문장까지 허용
+- 첫 줄: "{date_str} 간추린 숏뉴스입니다." 로 시작
+- 정치 / 경제 / 사회 / 국제 / 날씨로 분류해서 묶을 것
+- 정치 5개, 경제 3개, 사회 5개, 국제 3개, 날씨 1개 (총 17개 이상)
+-각 뉴스는 "ㆍ" 기호로 시작
+- 일반 뉴스는 1~2문장 요약
+- 매우 중요한 뉴스는 3~4문장까지 허용
 - 기사 제목을 그대로 쓰지 말고 기자가 요약한 문장처럼 작성
 - 감정적·선동적 표현 금지, 정보 전달 위주
 - 전체 톤은 shortnews.co.kr처럼 차분하고 명확하게
+- 날씨는 구체적인 기온과 지역별 날씨 정보 포함
 - HTML 태그 없이 순수 텍스트로 작성
 
 [입력 데이터]
@@ -69,7 +74,7 @@ def summarize_with_claude(news_list):
 
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
-        max_tokens=2048,
+        max_tokens=4096,
         messages=[
             {"role": "user", "content": prompt}
         ]
@@ -86,6 +91,7 @@ def post_to_wordpress(title, content):
         "title": title,
         "content": full_content,
         "status": "publish",
+        "featured_media": 2587,
     }
     response = requests.post(
         endpoint,
@@ -114,7 +120,7 @@ def main():
     kst = pytz.timezone('Asia/Seoul')
     now = datetime.now(kst)
     weekdays = ['월', '화', '수', '목', '금', '토', '일']
-    title = f"{now.strftime('%y')}년 {now.strftime('%m')}월 {now.strftime('%d')}일 {weekdays[now.weekday()]}요일 간추린 숏뉴스"
+    title = f"{now.strftime('%y')}년 {now.strftime('%m')}월 {now.strftime('%d')}일 {weekdays[now.weekday()]}요일 간추린 뉴스"
     post_to_wordpress(title, article_content)
     print("=== 완료 ===")
 
