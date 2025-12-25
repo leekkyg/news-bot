@@ -37,7 +37,7 @@ def fetch_news():
 
 def summarize_with_gemini(news_list):
     genai.configure(api_key=GOOGLE_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.0-flash')
     
     news_text = ""
     for i, news in enumerate(news_list, 1):
