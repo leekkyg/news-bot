@@ -1,9 +1,4 @@
-[build]
-builder = "NIXPACKS"
-
-[deploy]
-startCommand = "python main.py"
-
-# 매일 한국시간 8:05 AM 실행 (UTC 23:05 전날)
-[cron]
-schedule = "5 23 * * *"
+feedparser==6.0.10
+requests==2.31.0
+pytz==2024.1
+google-generativeai==0.8.0
