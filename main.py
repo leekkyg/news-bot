@@ -11,6 +11,8 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 WP_URL = os.environ.get("WP_URL")
 WP_USER = os.environ.get("WP_USER")
 WP_APP_PASSWORD = os.environ.get("WP_APP_PASSWORD")
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 # RSS 피드 목록 (속보/이슈/정치 중심)
 RSS_FEEDS = [
@@ -49,21 +51,18 @@ def fetch_stock_info():
     try:
         headers = {'User-Agent': 'Mozilla/5.0'}
         
-        # 코스피
         kospi_url = "https://finance.naver.com/sise/sise_index.naver?code=KOSPI"
         res = requests.get(kospi_url, headers=headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         kospi = soup.select_one('#now_value').text.strip()
         kospi_change = soup.select_one('#change_value_and_rate').text.strip()
         
-        # 코스닥
         kosdaq_url = "https://finance.naver.com/sise/sise_index.naver?code=KOSDAQ"
         res = requests.get(kosdaq_url, headers=headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         kosdaq = soup.select_one('#now_value').text.strip()
         kosdaq_change = soup.select_one('#change_value_and_rate').text.strip()
         
-        # 환율
         exchange_url = "https://finance.naver.com/marketindex/"
         res = requests.get(exchange_url, headers=headers)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -126,6 +125,26 @@ HTML 형식으로 출력하세요. (p 태그로 문단 구분)"""
     
     return message.content[0].text
 
+def send_telegram(title, url):
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        print("[SKIP] 텔레그램 설정 없음")
+        return
+    
+    message = f"📰 새 글 발행!\n\n{title}\n\n{url}"
+    telegram_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    
+    try:
+        response = requests.post(telegram_url, data={
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": message
+        })
+        if response.status_code == 200:
+            print("[SUCCESS] 텔레그램 알림 전송 완료")
+        else:
+            print(f"[ERROR] 텔레그램 알림 실패: {response.text}")
+    except Exception as e:
+        print(f"[ERROR] 텔레그램 알림 실패: {e}")
+
 def post_to_wordpress(title, content, stock_info):
     image_url = "https://pub-d5e485446b5c4e8d900036e639bf8d6c.r2.dev/wp-content/uploads/2025/12/newss.jpg"
     full_content = f'<img src="{image_url}" alt="간추린 뉴스" />\n\n{content}\n\n<p><strong>📈 오늘의 증시</strong><br>{stock_info}</p>'
@@ -145,9 +164,13 @@ def post_to_wordpress(title, content, stock_info):
         headers={"Content-Type": "application/json"}
     )
     if response.status_code == 201:
-        print(f"[SUCCESS] 발행 완료: {response.json().get('link')}")
+        post_url = response.json().get('link')
+        print(f"[SUCCESS] 발행 완료: {post_url}")
+        send_telegram(title, post_url)
+        return post_url
     else:
         print(f"[ERROR] 발행 실패: {response.status_code} - {response.text}")
+        return None
 
 def main():
     print("=== 뉴스 자동 발행 시작 ===")
